@@ -17,13 +17,16 @@ export default {
             number: 10
         }
     },
+    mounted() {
+        this.updateModifierPayload();
+    },
     methods: {
         updateModifierPayload() {
-            this.$store.commit('updateModifierPayload',{
-                modifierIndex: this.index,
-                filterIndex: this.filterIndex,
-                payload: {
-                    number: this.number
+            this.$emit('payloadUpdated', {
+                index: this.index,
+                type: 'Number',
+                data: {
+                    number: this.number,
                 }
             });
         }

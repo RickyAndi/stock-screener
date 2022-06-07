@@ -1,6 +1,6 @@
 <template>
     <div class="block">
-        <Filter class="mt-2" v-on:filter-removed="removeFilter" v-for="(filter, index) in filters" :key="index" :index="index" :filter="filter" />
+        <Filter class="mt-2" v-on:filter-removed="removeFilter" v-for="(modifiers, index) in filters" :key="index" :index="index" :modifiers="modifiers" v-on:payloadUpdated="updateFilterPayload" />
     </div>
     <div class="block mt-2">
         <button @click="addFilter" type="button" class="inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
@@ -136,9 +136,15 @@ export default {
         removeFilter(payload) {
             this.filters.splice(payload.index, 1);
         },
+        updateFilterPayload(payload) {
+            this.$store.commit('updateFilter', {
+                index: payload.index,
+                modifiers: payload.modifiers
+            });
+        },
         async runScan() {
 
-            const queries = this.filters.map(filter => filter.modifiers);
+            const queries = this.filters;
             const response = await axios.get('/filter', {
                 params: {
                     query: JSON.stringify(queries)

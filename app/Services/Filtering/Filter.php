@@ -2,7 +2,17 @@
 
 namespace App\Services\Filtering;
 
+use App\Models\StockTicker;
+
 class Filter
 {
-    private $comparisonOperator; 
+    private $filters = [];
+    private $endResultChecker;
+
+    public static function build(StockTicker $stockTicker, array $query)
+    {
+        foreach ($query as $modifier) {
+            $modifier = Modifier::fromArray($stockTicker, $modifier);
+        }
+    }
 }

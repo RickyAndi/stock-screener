@@ -1,7 +1,7 @@
 <template>
     <div class="flex gap-x-2 align-baseline">
-        <div v-for="(modifier, modifierIndex) in filter.modifiers" :key="modifierIndex">
-            <component :is="modifier.type" :modifier="modifier" :index="modifierIndex" :filterIndex="index" />
+        <div v-for="(modifier, modifierIndex) in modifiers" :key="modifierIndex">
+            <component :is="modifier.type" :modifier="modifier" :index="modifierIndex" v-on:payloadUpdated="updateModifierPayload" />
         </div>
         <div>
             <select @change="addModifier" v-model="selectedModifierType" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
@@ -21,6 +21,8 @@
 </template>
 
 <script>
+import { stockAttributes, measures, bollingerBands, arithmeticOperations, comparisonOperations, crossOperations } from './modifiers';
+
 export default {
     name: 'Filter',
     computed: {
@@ -31,269 +33,114 @@ export default {
                 "GreaterThan",
                 "GreaterThanEqualTo",
                 "LessThan",
-                "LessThanEqualTo"
+                "LessThanEqualTo",
+                "CrossedAbove",
+                "CrossedBelow"
             ];
 
-            return this.filter.modifiers.some((modifier) => {
+            return this.modifiers.some((modifier) => {
                 return comparisonTypes.includes(modifier.type);
             });
         },
+        lastModifierIsArithmetic() {
+            if (!this.modifiers.length) {
+                return false;
+            }
+
+            return ["Plus", "Minus", "Time", 'Divide'].includes(this.modifiers[this.modifiers.length - 1].type);
+        },
         availableModifiers() {
 
-            if (this.filter.modifiers.length % 2 != 0) {
+            if (!this.modifiers.length) {
+                return [
+                    measures,
+                    stockAttributes,
+                    bollingerBands
+                ];
+            }
+
+            if (this.modifiers.length % 2 != 0) {
                 if (this.hasComparisonOperator) {
                     return [
-                        {
-                            name: "Arithmetic Operation",
-                            parentType: "Arithmetic Operation",
-                            options: [
-                                {
-                                    name: "+",
-                                    component: "Plus"
-                                },
-                                {
-                                    name: "-",
-                                    component: "Minus"
-                                },
-                                {
-                                    name: "*",
-                                    component: "Time"
-                                },
-                                {
-                                    name: "/",
-                                    component: "Divide"
-                                }
-                            ]
-                        }
+                        arithmeticOperations
                     ];
                 }
 
-                return [
-                    {
-                        name: "Arithmetic Operation",
-                        parentType: "Arithmetic Operation",
-                        options: [
-                            {
-                                name: "+",
-                                component: "Plus"
-                            },
-                            {
-                                name: "-",
-                                component: "Minus"
-                            },
-                            {
-                                name: "*",
-                                component: "Time"
-                            },
-                            {
-                                name: "/",
-                                component: "Divide"
-                            }
-                        ]
-                    },
-                    {
-                        name: "Comparison Operation",
-                        parentType: "Comparison Operation",
-                        options: [
-                            {
-                                name: "=",
-                                component: "Equals"
-                            },
-                            {
-                                name: "!=",
-                                component: "NotEquals"
-                            },
-                            {
-                                name: ">",
-                                component: "GreaterThan"
-                            },
-                            {
-                                name: ">=",
-                                component: "GreaterThanEqualTo"
-                            },
-                            {
-                                name: "<",
-                                component: "LessThan"
-                            },
-                            {
-                                name: "<=",
-                                component: "LessThanEqualTo"
-                            },
-                        ]
-                    }
-                ];
+                return [].concat(!this.lastModifierIsArithmetic ? [
+                    arithmeticOperations
+                ] : [])
+                .concat([
+                    comparisonOperations,
+                    crossOperations
+                ]);
             }
 
             if (this.hasComparisonOperator) {
-                return [
-                    {
-                        name: "Measures",
-                        parentType: "Measures",
-                        options: [
-                            {
-                                name: "Number",
-                                component: "Number"
-                            }
-                        ]
-                    },
-                    {
-                        name: "Stock Attributes",
-                        parentType: "StockAttribute",
-                        options: [
-                            {
-                                name: "Open",
-                                component: "Open"
-                            },
-                            {
-                                name: "High",
-                                component: "High"
-                            },
-                            {
-                                name: "Low",
-                                component: "Low"
-                            },
-                            {
-                                name: "Close",
-                                component: "Close"
-                            }
-                        ]
-                    },
-                    {
-                        name: "Arithmetic Operation",
-                        parentType: "Arithmetic Operation",
-                        options: [
-                            {
-                                name: "+",
-                                component: "Plus"
-                            },
-                            {
-                                name: "-",
-                                component: "Minus"
-                            },
-                            {
-                                name: "*",
-                                component: "Time"
-                            },
-                            {
-                                name: "/",
-                                component: "Divide"
-                            }
-                        ]
-                    },
-                ];
+                return [].concat(!this.lastModifierIsArithmetic ? [
+                    arithmeticOperations
+                ] : [])
+                .concat([
+                    measures,
+                    stockAttributes,
+                    bollingerBands
+                ]);
             }
 
-            return [
-                {
-                    name: "Measures",
-                    parentType: "Measures",
-                    options: [
-                        {
-                            name: "Number",
-                            component: "Number"
-                        }
-                    ]
-                },
-                {
-                    name: "Stock Attributes",
-                    parentType: "StockAttribute",
-                    options: [
-                        {
-                            name: "Open",
-                            component: "Open"
-                        },
-                        {
-                            name: "High",
-                            component: "High"
-                        },
-                        {
-                            name: "Low",
-                            component: "Low"
-                        },
-                        {
-                            name: "Close",
-                            component: "Close"
-                        }
-                    ]
-                },
-                {
-                    name: "Arithmetic Operation",
-                    parentType: "Arithmetic Operation",
-                    options: [
-                        {
-                            name: "+",
-                            component: "Plus"
-                        },
-                        {
-                            name: "-",
-                            component: "Minus"
-                        },
-                        {
-                            name: "*",
-                            component: "Time"
-                        },
-                        {
-                            name: "/",
-                            component: "Divide"
-                        }
-                    ]
-                },
-                {
-                    name: "Comparison Operation",
-                    parentType: "Comparison Operation",
-                    options: [
-                        {
-                            name: "Equals",
-                            component: "Equals"
-                        },
-                        {
-                            name: "Not Equals",
-                            component: "NotEquals"
-                        },
-                        {
-                            name: "Greater Than",
-                            component: "GreaterThan"
-                        },
-                        {
-                            name: "Greater Than Equal To",
-                            component: "GreaterThanEqualTo"
-                        },
-                        {
-                            name: "Less Than",
-                            component: "LessThan"
-                        },
-                        {
-                            name: "Less Than Equal To",
-                            component: "LessThanEqualTo"
-                        },
-                    ]
-                }
-            ];
+            return [].concat(!this.lastModifierIsArithmetic ? [
+                arithmeticOperations
+            ] : [])
+            .concat([
+                measures,
+                stockAttributes,
+                bollingerBands
+            ]);
         }
     },
     methods: {
         addModifier() {
-            this.$store.commit('addModifier', {
-                index: this.index,
-                modifierType: this.selectedModifierType
+            this.modifiers.push({
+                type: this.selectedModifierType,
+                data: {}
             });
 
             this.selectedModifierType = null;
+
+            this.$emit('payloadUpdated', {
+                index: this.index,
+                modifiers: this.modifiers
+            });
         },
         removeFilter() {
             this.$emit('filter-removed', {
                 index: this.index
             })
+        },
+        updateModifierPayload(payload) {
+            console.log(payload);
+            this.modifiers[payload.index]['data'] = payload.data;
+            this.modifiers[payload.index]['type'] = payload.type;
+
+            this.$emit('payloadUpdated', {
+                index: this.index,
+                modifiers: this.modifiers
+            });
         }
     },
     props: {
         index: Number,
-        filter: Object
+        modifier: Array
     },
     data() {
         return {
-            selectedModifierType: null
+            selectedModifierType: null,
+            modifiers: []
         }
+    },
+    mounted() {
+        this.$emit('payloadUpdated', {
+            modifiers: this.modifiers,
+            index: this.index
+        });
     }
 }
 </script>

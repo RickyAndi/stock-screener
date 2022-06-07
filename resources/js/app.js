@@ -6,24 +6,23 @@ import StockAttribute from './vue/filter/StockAttribute.vue';
 import ArithmeticOperation from './vue/filter/ArithmeticOperation.vue';
 import ComparisonOperation from './vue/filter/ComparisonOperation.vue';
 import NumberComponent from './vue/filter/Number.vue';
+import LowerBollingerBand from './vue/filter/indicator/LowerBollingerBand.vue';
+import UpperBollingerBand from './vue/filter/indicator/UpperBollingerBand.vue';
 
 const store = createStore({
     state() {
         return {
-            filters: [{
-                modifiers: [{
-                    type: 'Low'
-                }]
-            }]
+            filters: [
+                []
+            ]
         }
     },
     mutations: {
         addFilter(state) {
-            state.filters.push({
-                modifiers: [{
-                    type: 'Low'
-                }],
-            });
+            state.filters.push([]);
+        },
+        updateFilter(state, payload) {
+            state.filters[payload.index] = payload.modifiers;
         },
         updateModifierPayload(state, payload) {
             const existingPayload = state.filters[payload.filterIndex].modifiers[payload.modifierIndex];
@@ -32,7 +31,7 @@ const store = createStore({
             state.filters[payload.filterIndex].modifiers[payload.modifierIndex] = updatedPayload;
         },
         addModifier(state, payload) {
-            state.filters[payload.index].modifiers.push({
+            state.filters[payload.index].push({
                 type: payload.modifierType
             });
         }
@@ -49,6 +48,8 @@ app.component("GreaterThan", ComparisonOperation);
 app.component("GreaterThanEqualTo", ComparisonOperation);
 app.component("LessThan", ComparisonOperation);
 app.component("LessThanEqualTo", ComparisonOperation);
+app.component('CrossedAbove', ComparisonOperation);
+app.component('CrossedBelow', ComparisonOperation);
 
 app.component('Plus', ArithmeticOperation);
 app.component('Minus', ArithmeticOperation);
@@ -63,5 +64,8 @@ app.component('Open', StockAttribute);
 app.component('Close', StockAttribute);
 
 app.component('Number', NumberComponent);
+
+app.component('UpperBollingerBand', UpperBollingerBand);
+app.component('LowerBollingerBand', LowerBollingerBand);
 
 app.mount('#app');

@@ -10,24 +10,5 @@ use App\Services\Filtering\StockAttribute\Open;
 
 class Builder
 {
-    const FILTER_MAP = [
-        'Low' => Low::class,
-        'High' => High::class,
-        'Close' => Close::class,
-        'Open' => Open::class
-    ];
-
-    public function filter(array $filterPayload)
-    {
-        $tickers = StockTicker
-            ::select('name')
-            ->get();
-
-        
-    }
-
-    private function buildFilter(array $filterPayload)
-    {
-
-    }
+    private $filters = [];
 }
