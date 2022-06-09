@@ -38,14 +38,22 @@ class StockAttribute implements ResultInterface
         $result = $query
             ->get();
 
-        $tickerData = $result->first();
-
-        if (is_null($tickerData)) {
+        if (!$result->count()) {
             return 0;
         }
 
         $column = $this->getColumn();
-        return $tickerData->{$column};
+
+        if ($result->count() === 1) {
+            return $result->first()->{$column};
+        }
+
+        return $result
+            ->map(function ($stockData) use ($column) {
+                return $stockData->{$column};
+            })
+            ->values()
+            ->all();
     }
 
     private function getColumn(): string

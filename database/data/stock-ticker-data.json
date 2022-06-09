@@ -9,5 +9,13 @@
     {
         "ticker": "TSLA",
         "name": "Tesla"
+    },
+    {
+        "ticker": "RELIANCE",
+        "name": "Reliance"
+    },
+    {
+        "ticker": "POLYPLEX",
+        "name": "Polyplex Corporation Limited"
     }
 ]

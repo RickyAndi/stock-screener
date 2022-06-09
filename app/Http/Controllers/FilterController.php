@@ -3,9 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\StockTicker;
-use App\Services\Filtering\ComparisonOperation;
 use App\Services\Filtering\EndResultCheckers\EndResultChecker;
-use App\Services\Filtering\Enums\ComparisonEnum;
 use App\Services\Filtering\Enums\EndResultCheckersEnum;
 use App\Services\Filtering\Enums\IndicatorsEnum;
 use App\Services\Filtering\Enums\MathOperationEnum;

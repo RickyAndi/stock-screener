@@ -21,32 +21,44 @@ class LowerBollingerBand implements ResultInterface
 
     public function getResult()
     {
-        $query = $this->getRootQuery();
+        try {
+            $query = $this->getRootQuery();
 
-        $dateQuery = $this->getQueryDate();
+            $query = $query
+                ->select('close')
+                ->where('stock_ticker_id', $this->modifier->stockTicker->id);
 
-        $closePrices = $query
-            ->select('close')
-            ->where('time', '>', $dateQuery->format('Y-m-d H:i:s'))
-            ->where('stock_ticker_id', $this->modifier->stockTicker->id)
-            ->get();
+            $query = $this->modifyQueryByDate($query);
 
-        $timePeriod = (int) $this->modifier->data['movingAveragePeriod'];
-        $standardDeviation = $this->modifier->data['standardDeviation'];
+            $closePrices = $query
+                ->orderBy('time', 'DESC')
+                ->get();
 
-        $result = trader_bbands(
-            $closePrices->pluck('close')->all(),
-            $timePeriod,
-            $standardDeviation,
-            $standardDeviation,
-            TRADER_MA_TYPE_SMA
-        );
+            $timePeriod = (int) $this->modifier->data['movingAveragePeriod'];
+            $standardDeviation = $this->modifier->data['standardDeviation'];
 
-        if (is_bool($result)) {
-            throw new Exception("There was error getting bband data");
+            $converted = $closePrices->pluck('close')->map(function ($value) {
+                return (float) $value;
+            })->all();
+            Log::info(json_encode($converted));
+            $result = trader_bbands(
+                $converted,
+                $timePeriod,
+                $standardDeviation,
+                $standardDeviation,
+                TRADER_MA_TYPE_SMA
+            );
+
+            if (is_bool($result)) {
+                throw new Exception("There was error getting bband data");
+            }
+
+            return collect($result[2])->values()->toArray() ?? [];
+
+        } catch (Exception $exception) {
+            
+            return [];
         }
-
-        return collect($result[2])->values()->toArray() ?? [];
     }
 
     public function getType(): string
@@ -54,27 +66,48 @@ class LowerBollingerBand implements ResultInterface
         return IndicatorsEnum::LOWER_BOLLINGER_BAND;
     }
 
-    private function getQueryDate()
+    private function modifyQueryByDate($query)
     {
         $now = Carbon::now();
 
         if ($this->modifier->data['timeWindow'] === TimeWindowEnum::WITHIN_N_DAYS_AGO) {
             $number = $this->modifier->data['number'];
             $date = $now->subDays($number)->startOfDay();
-            return $date;
+            return $query
+                ->where('time', '>', $date->format('Y-m-d H:i:s'));
         }
 
         if ($this->modifier->data['timeWindow'] === TimeWindowEnum::LATEST) {
             $number = $this->modifier->data['number'];
             $date = $now->startOfDay();
-            return $date;
+            return $query
+                ->where('time', '>', $date->format('Y-m-d H:i:s'));
         }
 
         if ($this->modifier->data['timeWindow'] === TimeWindowEnum::ONE_DAY_AGO) {
             $number = $this->modifier->data['number'];
-            $date = $now->subDays(1)->startOfDay();
-            return $date;
-        } 
+            $date = $now->subDay()->startOfDay();
+            return $query
+                ->where('time', '>', $date->format('Y-m-d H:i:s'));
+        }
+
+        if ($this->modifier->data['timeWindow'] === TimeWindowEnum::N_DAYS_AGO) {
+            $number = $this->modifier->data['number'];
+            $maPeriode = $this->modifier->data['movingAveragePeriod'];
+            $toDate = Carbon
+                ::now()
+                ->subDays($number)
+                ->startOfDay();
+            $fromDate = Carbon
+                ::now()
+                ->subDays($number)
+                ->subDays($maPeriode)
+                ->startOfDay();
+
+            return $query
+                ->where('time', '>=', $fromDate->format('Y-m-d H:i:s'))
+                ->where('time', '<=', $toDate->format('Y-m-d H:i:s'));
+        }
     }
 
     private function getRootQuery()

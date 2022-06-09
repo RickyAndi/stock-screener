@@ -24,10 +24,7 @@ abstract class Crossed
                 $toBeCrossed[] = $toBeCrossedSingleValue;
             }
         }
-
-        Log::info(json_encode($resultOne->getResult()));
-        Log::info(json_encode($toBeCrossed));
-
+        
         $checkingIfValueWasCrossing = [];
         $arraifiedResultOne = $resultOne->getResult();
 

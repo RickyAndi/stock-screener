@@ -2,7 +2,6 @@
 
 namespace App\Services\Filtering\EndResultCheckers;
 
-use Exception;
 use App\Services\Filtering\Interfaces\ResultInterface;
 
 abstract class Comparison
@@ -11,10 +10,6 @@ abstract class Comparison
 
     public function check(ResultInterface $resultOne, ResultInterface $resultTwo)
     {
-        if (is_array($resultOne->getResult()) || is_array($resultTwo->getResult())) {
-            throw new Exception('Array cannot be equally compared');
-        }
-
         return $this->compare($resultOne, $resultTwo);
     }
 }

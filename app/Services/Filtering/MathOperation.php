@@ -24,21 +24,141 @@ class MathOperation implements ResultInterface
 
     private function plus($toBeOperatedOne, $toBeOperatedTwo)
     {
+        $resultOne = $toBeOperatedOne->getResult();
+        $resultTwo = $toBeOperatedTwo->getResult();
+
+        if (is_array($resultOne) && is_array($resultTwo)) {
+            $results = [];
+            foreach ($resultOne as $index => $value) {
+                $results[] = $value + $resultTwo[$index] ?? 0;
+            }
+
+            return $results;
+        }
+
+        if (is_array($resultOne) && !is_array($resultTwo)) {
+            $results = [];
+            foreach ($resultOne as $index => $value) {
+                $results[] = $value + $resultTwo;
+            }
+
+            return $results;
+        }
+
+        if (!is_array($resultOne) && is_array($resultTwo)) {
+            $results = [];
+            foreach ($resultTwo as $index => $value) {
+                $results[] = $value + $resultOne;
+            }
+
+            return $results;
+        }
+
         return $toBeOperatedOne->getResult() + $toBeOperatedTwo->getResult();
     }
 
     private function minus($toBeOperatedOne, $toBeOperatedTwo)
     {
+        $resultOne = $toBeOperatedOne->getResult();
+        $resultTwo = $toBeOperatedTwo->getResult();
+
+        if (is_array($resultOne) && is_array($resultTwo)) {
+            $results = [];
+            foreach ($resultOne as $index => $value) {
+                $results[] = $value - $resultTwo[$index] ?? 0;
+            }
+
+            return $results;
+        }
+
+        if (is_array($resultOne) && !is_array($resultTwo)) {
+            $results = [];
+            foreach ($resultOne as $index => $value) {
+                $results[] = $value - $resultTwo;
+            }
+
+            return $results;
+        }
+
+        if (!is_array($resultOne) && is_array($resultTwo)) {
+            $results = [];
+            foreach ($resultTwo as $index => $value) {
+                $results[] = $resultOne - $value;
+            }
+
+            return $results;
+        }
+
         return $toBeOperatedOne->getResult() - $toBeOperatedTwo->getResult();
     }
 
     private function divide($toBeOperatedOne, $toBeOperatedTwo)
     {
+        $resultOne = $toBeOperatedOne->getResult();
+        $resultTwo = $toBeOperatedTwo->getResult();
+
+        if (is_array($resultOne) && is_array($resultTwo)) {
+            $results = [];
+            foreach ($resultOne as $index => $value) {
+                $results[] = $value / $resultTwo[$index] ?? 0;
+            }
+
+            return $results;
+        }
+
+        if (is_array($resultOne) && !is_array($resultTwo)) {
+            $results = [];
+            foreach ($resultOne as $index => $value) {
+                $results[] = $value / $resultTwo;
+            }
+
+            return $results;
+        }
+
+        if (!is_array($resultOne) && is_array($resultTwo)) {
+            $results = [];
+            foreach ($resultTwo as $index => $value) {
+                $results[] = $resultOne / $value;
+            }
+
+            return $results;
+        }
+
         return $toBeOperatedOne->getResult() / $toBeOperatedTwo->getResult();
     }
 
     private function time($toBeOperatedOne, $toBeOperatedTwo)
     {
+        $resultOne = $toBeOperatedOne->getResult();
+        $resultTwo = $toBeOperatedTwo->getResult();
+
+        if (is_array($resultOne) && is_array($resultTwo)) {
+            $results = [];
+            foreach ($resultOne as $index => $value) {
+                $results[] = $value * $resultTwo[$index] ?? 0;
+            }
+
+            return $results;
+        }
+
+        if (is_array($resultOne) && !is_array($resultTwo)) {
+            $results = [];
+            foreach ($resultOne as $index => $value) {
+                $results[] = $value * $resultTwo;
+            }
+
+            return $results;
+        }
+
+        if (!is_array($resultOne) && is_array($resultTwo)) {
+            $results = [];
+            foreach ($resultTwo as $index => $value) {
+                $results[] = $resultOne * $value;
+            }
+
+            return $results;
+        }
+
         return $toBeOperatedOne->getResult() * $toBeOperatedTwo->getResult();
     }
 
@@ -49,7 +169,7 @@ class MathOperation implements ResultInterface
 
     public function getType(): string
     {
-        return $this->modifier['type'];
+        return $this->modifier->type;
     }
 
     public function operate($toBeOperatedOne, $toBeOperatedTwo)
