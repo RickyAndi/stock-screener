@@ -40,7 +40,7 @@ class LowerBollingerBand implements ResultInterface
             $converted = $closePrices->pluck('close')->map(function ($value) {
                 return (float) $value;
             })->all();
-            Log::info(json_encode($converted));
+            
             $result = trader_bbands(
                 $converted,
                 $timePeriod,
